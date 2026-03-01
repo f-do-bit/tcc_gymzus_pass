@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" href="folhadeestilo.css">
+    <title>Solicitação</title>
+</head>
+<body>
+    <header>
+        <div class="conteiner-cabecario cabecario">
+          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+              <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+            </a>
+    
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+              <li><a href="index.html" class="nav-link px-2 text-dark">Home</a></li>
+              <li><a href="exporar.html" class="nav-link px-2 text-dark">Explorar</a></li>
+              <li><a href="solicitação.html" class="nav-link px-2 text-dark">Solicitações</a></li>
+              <li><a href="#" class="nav-link px-2 text-dark">Ajudar</a></li>
+              <li><a href="#" class="nav-link px-2 text-dark">Sobre</a></li>
+            </ul>
+    
+            <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+              <input type="search" class="form-control form-control-dark text-bg-Light" placeholder="Search..." aria-label="Search">
+            </form>
+    
+            <div class="text-end">
+               <button id="btn-ir-login" class="btn btn-outline-dark me-2"><a href="login.html" class="text-decoration-none text-dark">Fazer Login</a></button>
+         <button id="btn-cadastro-aluno" class="btn btn-warning"><a href="aluno.html" class="text-decoration-none text-dark">Sou Aluno</a></button>
+         <button id="btn-cadastro-prof" class="btn btn-warning"><a href="professor.html" class="text-decoration-none text-dark">Sou Professor</a></button>  
+            </div>
+            <hr> 
+          </div>
+        </div>
+    </header>
+
+    <main class="container mt-5">
+        <!-- Seção para fazer a solicitação -->
+        <div class="p-5 mb-4 bg-light rounded-3">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Solicite sua Aula Particular</h1>
+                <p class="col-md-8 fs-4">Encontre o personal trainer ideal para você. Clique no botão abaixo para preencher o formulário de solicitação.</p>
+                <!-- Botão que abre o modal -->
+                <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#solicitacaoModal">
+                    Fazer Solicitação
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção para acompanhar as solicitações -->
+        <div class="row align-items-md-stretch">
+            <div class="col-md-12">
+                <div class="h-100 p-5 border rounded-3">
+                    <h2>Acompanhamento de Solicitações</h2>
+                    <p>Aqui você pode ver o status das suas solicitações de aula.</p>
+                    <div id="lista-solicitacoes">
+                        <!-- Exemplo de card de solicitação -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                Solicitação de: <strong>Exemplo Usuário</strong>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">Tipo de Aula: Musculação</h5>
+                                <p class="card-text">Gostaria de um treino focado em hipertrofia para membros superiores. Tenho disponibilidade nas segundas e quartas à noite.</p>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Status: Aguardando resposta do professor</span>
+                                <button class="btn btn-sm btn-outline-danger btn-excluir">Excluir</button>
+                            </div>
+                        </div>
+                        <!-- Novas solicitações serão adicionadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal (Pop-up) para o formulário de solicitação -->
+    <div class="modal fade" id="solicitacaoModal" tabindex="-1" aria-labelledby="solicitacaoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="solicitacaoModalLabel">Formulário de Solicitação de Aula</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-solicitacao">
+                        <div class="mb-3">
+                            <label for="solicitante-nome" class="form-label">Seu Nome</label>
+                            <input type="text" class="form-control" id="solicitante-nome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="solicitante-contato" class="form-label">Contato (Telefone ou Rede Social)</label>
+                            <input type="text" class="form-control" id="solicitante-contato" placeholder="(Opcional)">
+                        </div>
+                        <div class="mb-3">
+                            <label for="solicitante-aula" class="form-label">Tipo de Aula Desejada</label>
+                            <input type="text" class="form-control" id="solicitante-aula" placeholder="Ex: Musculação, Funcional, Yoga, etc." required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="solicitante-descricao" class="form-label">Descrição da Solicitação</label>
+                            <textarea class="form-control" id="solicitante-descricao" rows="3" placeholder="Descreva o que você precisa, seus objetivos, horários de preferência, etc." required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" form="form-solicitacao" class="btn btn-primary">Enviar Solicitação</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <script src="index.js"></script>
+    <script src="solicitacao.js"></script>
+</body>
+</html>

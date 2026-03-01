@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="folhadeestilo.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <title>GYMZus Pass prototipo </title>
+</head>
+<body>
+    <div class="conteiner-principal">
+        <header>
+    <div class="conteiner-cabecario cabecario">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+          <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+        </a>
+
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+          <li><a href="index.html" class="nav-link px-2 text-dark">Home</a></li>
+          <li><a href="exporar.html" class="nav-link px-2 text-dark">Explorar</a></li>
+          <li><a href="solicitação.html" class="nav-link px-2 text-dark">Solicitações</a></li>
+          <li><a href="#" class="nav-link px-2 text-dark">Ajudar</a></li>
+          <li><a href="#" class="nav-link px-2 text-dark">Sobre</a></li>
+        </ul>
+
+        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+          <input type="search" class="form-control form-control-dark text-bg-Light" placeholder="Search..." aria-label="Search">
+        </form>
+
+        <div class="text-end">
+          <button id="btn-ir-login" class="btn btn-outline-dark me-2"><a href="login.html" class="text-decoration-none text-dark">Fazer Login</a></button>
+         <button id="btn-cadastro-aluno" class="btn btn-warning"><a href="aluno.html" class="text-decoration-none text-dark">Sou Aluno</a></button>
+         <button id="btn-cadastro-prof" class="btn btn-warning"><a href="professor.html" class="text-decoration-none text-dark">Sou Professor</a></button>  
+        </div>
+        <hr> 
+      </div>
+    </div>
+  </header>
+<div class="corpo-principal conteudo">
+    <div class=" mx-auto ">
+      <h1 >Transforme e evolua seu corpo com o GymZus Pass, uma
+         plataforma inovadora de aulas particulares!</h1>
+          <p>Intermediação precisa entre aluno e professor</p>
+      <div class="d-grid gap-2 d-sm-flex ">
+        <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
+          <input type="search" class="form-control form-control-dark text-bg-Light" placeholder="Search..." aria-label="Search">
+        </form>
+
+      </div>
+    </div>
+  </div>
+  
+  <div class="container py-5">
+    <h2 class="text-center mb-4">Conheça nossos Personal Trainers</h2>
+    <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        </div>
+        <div class="carousel-inner">
+         
+            <div class="carousel-item active">
+                <div class="row justify-content-center g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center">
+                            <img src="https://via.placeholder.com/150" class="rounded-circle mx-auto mt-3" alt="Foto do Personal Trainer" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">João da Silva</h5>
+                                <p class="card-text">São Paulo, SP</p>
+                                <a href="#" class="btn btn-warning mt-auto">Mais informações</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center">
+                            <img src="https://via.placeholder.com/150" class="rounded-circle mx-auto mt-3" alt="Foto do Personal Trainer" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">Maria Oliveira</h5>
+                                <p class="card-text">Rio de Janeiro, RJ</p>
+                                <a href="#" class="btn btn-warning mt-auto">Mais informações</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center">
+                            <img src="https://via.placeholder.com/150" class="rounded-circle mx-auto mt-3" alt="Foto do Personal Trainer" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">Carlos Pereira</h5>
+                                <p class="card-text">Belo Horizonte, MG</p>
+                                <a href="#" class="btn btn-warning mt-auto">Mais informações</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="row justify-content-center g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center">
+                            <img src="https://via.placeholder.com/150" class="rounded-circle mx-auto mt-3" alt="Foto do Personal Trainer" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">Ana Costa</h5>
+                                <p class="card-text">Salvador, BA</p>
+                                <a href="#" class="btn btn-warning mt-auto">Mais informações</a>
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+</div>
+
+<script src="index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+</body>
+</html>

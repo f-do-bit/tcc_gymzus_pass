@@ -1,0 +1,11 @@
+sugestão:
+professor - nome do aluno, contato,dias das aulas, preços 
+Alunos- nome do professor, contato,dias das aulas, preços ,portifólio do professor (Rede Social)
+
+
+O que precisa do site:
+home: fazer solicitação na pagina junto com conheça os nossos profissionais,  
+
+solitação: Fazer solicitação tira o nome e o contato e manter a aula desejada e a descrição da solicitação 
+
+explorar: adicionar filtro de aulas  
