@@ -1,230 +1,292 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '@/firebase'; 
 import SolicitacaoModal from './SolicitacaoModal';
 
 interface SolicitacaoItem {
-  id: number;
+  id: string; 
   nome: string;
   contato: string;
   tipoAula: string;
   descricao: string;
+  localizacao: string;
+  valorPorHora: string;
+  academiaFrequente: string; 
   status: string;
 }
 
 export default function Solicitacao() {
-  const [solicitacoes, setSolicitacoes] = useState<SolicitacaoItem[]>([
-    {
-      id: 1,
-      nome: "Exemplo Usuário",
-      tipoAula: "Musculação",
-      descricao: "Gostaria de um treino focado em hipertrofia para membros superiores.",
-      contato: "11 99999-9999",
-      status: "Aguardando resposta do professor"
-    }
-  ]);
-
+  const [solicitacoes, setSolicitacoes] = useState<SolicitacaoItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAddSolicitacao = (novaSolicitacao: SolicitacaoItem) => {
-    setSolicitacoes([novaSolicitacao, ...solicitacoes]);
-  };
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'Solicitações'), 
+      (querySnapshot) => {
+        const lista = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          
+          // Lógica forçada para substituir o texto antigo
+          let statusFinal = data.status;
+          if (statusFinal === 'Aguardando resposta do professor' || !statusFinal) {
+            statusFinal = 'Minhas solicitações';
+          }
 
-  const excluirSolicitacao = (id: number) => {
-    setSolicitacoes(solicitacoes.filter(s => s.id !== id));
+          return {
+            id: doc.id,
+            nome: data.seu_nome || '',       
+            contato: data.contato || '',
+            tipoAula: data.tipoAula || '',
+            descricao: data.descrição || '',
+            localizacao: data.localizacao || 'Não informado',
+            valorPorHora: data.valorPorHora || '0',
+            academiaFrequente: data.academiaFrequente || 'Não informada',
+            status: statusFinal
+          };
+        });
+        
+        setSolicitacoes(lista.reverse());
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error("Erro ao buscar solicitações:", error);
+        setIsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const excluirSolicitacao = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'Solicitações', id)); 
+    } catch (error) {
+      console.error("Erro ao excluir solicitação:", error);
+      alert("Erro ao excluir.");
+    }
   };
 
   const getInitials = (nome: string) =>
-    nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+    nome ? nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : 'EU';
 
   return (
-    <main className="max-w-5xl mx-auto mt-10 px-4 m-1 sm:px-6 lg:px-8">
+    <main className="max-w-5xl mx-auto mt-10 px-4 sm:px-6 lg:px-8">
 
-      {/* Hero Card */}
+      {/* ── Hero Banner ── */}
       <div
-        className="relative overflow-hidden p-10 mb-8 rounded-2xl"
+        className="relative overflow-hidden p-10 mb-6 rounded-2xl"
         style={{
           background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,107,0,0.25)',
+          border: '1px solid rgba(255,107,0,0.2)',
         }}
       >
-        {/* Glow decorativo */}
+        {/* glow orb top-right */}
         <div
-          className="absolute -top-10 -right-10 w-52 h-52 rounded-full pointer-events-none"
-          style={{ background: 'rgba(255,107,0,0.06)' }}
+          className="absolute -top-12 -right-12 w-56 h-56 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%)' }}
+        />
+        {/* glow orb bottom-center */}
+        <div
+          className="absolute -bottom-16 left-1/3 w-72 h-48 rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(255,107,0,0.05) 0%, transparent 70%)' }}
         />
 
-        {/* Eyebrow */}
-        <span
-          className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest mb-4 px-3 py-1 rounded-full"
-          style={{
-            background: 'rgba(255,107,0,0.12)',
-            border: '1px solid rgba(255,107,0,0.3)',
-            color: '#ff6b00',
-          }}
+        {/* eyebrow */}
+        <p
+          className="text-xs font-semibold tracking-widest uppercase mb-3"
+          style={{ color: '#ff6b00' }}
         >
-          ⚡ Personal Trainer
-        </span>
+          GymZus Pass
+        </p>
 
-        <h1 className="text-4xl font-extrabold text-white mb-3 leading-tight">
+        <h1 className="text-4xl font-extrabold text-white mb-5 leading-tight">
           Solicite sua{' '}
           <span style={{ color: '#ff6b00' }}>Aula Particular</span>
         </h1>
 
-        <p className="text-base mb-7 max-w-2xl" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Encontre o personal trainer ideal para você. Preencha o formulário de solicitação e aguarde a resposta do professor.
-        </p>
-
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-2 font-semibold py-3 px-6 rounded-xl transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-2 font-semibold py-3 px-6 rounded-xl transition-opacity hover:opacity-90 text-sm"
           style={{ background: '#ff6b00', color: '#fff' }}
         >
           + Fazer Solicitação
         </button>
       </div>
 
-      {/* Lista de Solicitações */}
+      {/* ── Lista de Solicitações ── */}
       <section
-        className="rounded-2xl p-8 m-1 sm:px-6 lg:px-8"
+        className="rounded-2xl p-6"
         style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.025)',
+          border: '1px solid rgba(255,255,255,0.07)',
         }}
       >
-        {/* Section Header */}
+        {/* section header */}
         <div
-          className="flex items-center justify-between mb-6 pb-4 "
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+          className="flex items-center justify-between mb-5 pb-4"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            ✅ Acompanhamento de Solicitações
-          </h2>
-          {solicitacoes.length > 0 && (
+          <span
+            className="text-xs font-semibold tracking-widest uppercase"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Minhas solicitações
+          </span>
+          {!isLoading && solicitacoes.length > 0 && (
             <span
-              className="text-xs font-medium px-3 py-1 rounded-full"
+              className="text-xs font-semibold px-3 py-1 rounded-full"
               style={{
-                background: 'rgba(0,200,83,0.12)',
-                border: '1px solid rgba(0,200,83,0.25)',
-                color: '#00c853',
+                background: 'rgba(255,107,0,0.12)',
+                color: '#ff6b00',
+                border: '1px solid rgba(255,107,0,0.25)',
               }}
             >
-              {solicitacoes.length} ativa{solicitacoes.length > 1 ? 's' : ''}
+              {solicitacoes.length} {solicitacoes.length === 1 ? 'ativa' : 'ativas'}
             </span>
           )}
         </div>
 
-        <div className="space-y-4">
-          {solicitacoes.map((s) => (
-            <div
-              key={s.id}
-              className="rounded-2xl overflow-hidden"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
-              }}
-            >
-              {/* Item Header */}
+        <div className="space-y-3">
+          {isLoading ? (
+            <div className="text-center py-10" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              Carregando...
+            </div>
+          ) : solicitacoes.length === 0 ? (
+            <div className="text-center py-16" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              Nenhuma solicitação.
+            </div>
+          ) : (
+            solicitacoes.map((s) => (
               <div
-                className="flex items-center justify-between px-5 py-3"
+                key={s.id}
+                className="rounded-2xl overflow-hidden transition-all duration-200"
                 style={{
-                  background: 'rgba(255,107,0,0.06)',
-                  borderBottom: '1px solid rgba(255,107,0,0.12)',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
                 }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,107,0,0.2)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0"
-                    style={{
-                      background: 'rgba(255,107,0,0.2)',
-                      border: '1px solid rgba(255,107,0,0.4)',
-                      color: '#ff6b00',
-                    }}
-                  >
-                    {getInitials(s.nome)}
-                  </div>
-                  <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                      Solicitação de
-                    </p>
+                {/* Card header */}
+                <div
+                  className="flex items-center justify-between px-5 py-3"
+                  style={{
+                    background: 'rgba(255,107,0,0.06)',
+                    borderBottom: '1px solid rgba(255,107,0,0.1)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold"
+                      style={{
+                        background: 'rgba(255,107,0,0.18)',
+                        color: '#ff6b00',
+                        border: '1.5px solid rgba(255,107,0,0.3)',
+                      }}
+                    >
+                      {getInitials(s.nome)}
+                    </div>
                     <p className="text-sm font-semibold" style={{ color: '#ff6b00' }}>
                       {s.nome}
                     </p>
                   </div>
-                </div>
 
-                <span
-                  className="text-xs px-3 py-1 rounded-full"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'rgba(255,255,255,0.7)',
-                  }}
-                >
-                  {s.tipoAula}
-                </span>
-              </div>
-
-              {/* Item Body */}
-              <div className="p-5">
-                <h5 className="font-bold text-base mb-2" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                  Tipo de Aula: {s.tipoAula}
-                </h5>
-                <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>
-                  {s.descricao}
-                </p>
-                {s.contato && (
                   <span
-                    className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg"
+                    className="text-xs font-semibold px-3 py-1 rounded-full"
                     style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                      color: 'rgba(255,255,255,0.4)',
+                      background: 'rgba(255,255,255,0.05)',
+                      color: 'rgba(255,255,255,0.35)',
+                      border: '1px solid rgba(255,255,255,0.08)',
                     }}
                   >
-                    📞 Contato: {s.contato}
+                    {s.status}
                   </span>
-                )}
-              </div>
+                </div>
 
-              {/* Item Footer */}
-              <div
-                className="px-5 py-3 flex justify-between items-center"
-                style={{
-                  background: 'rgba(0,0,0,0.2)',
-                  borderTop: '1px solid rgba(255,255,255,0.05)',
-                }}
-              >
-                <span className="text-sm flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  <span
-                    className="inline-block w-2 h-2 rounded-full"
-                    style={{ background: '#ff6b00' }}
-                  />
-                  {s.status}
-                </span>
+                {/* Card body */}
+                <div className="p-5">
+                  <h5 className="font-bold text-base mb-2 text-white">
+                    Tipo de Aula: {s.tipoAula}
+                  </h5>
+                  <p
+                    className="text-sm mb-4 leading-relaxed"
+                    style={{ color: 'rgba(255,255,255,0.4)' }}
+                  >
+                    {s.descricao}
+                  </p>
 
-                <button
-                  onClick={() => excluirSolicitacao(s.id)}
-                  className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
+                  <div className="flex flex-wrap gap-2">
+                    <span
+                      className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg"
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.09)',
+                        color: 'rgba(255,255,255,0.5)',
+                      }}
+                    >
+                      📞 {s.contato}
+                    </span>
+                    <span
+                      className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg"
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.09)',
+                        color: 'rgba(255,255,255,0.5)',
+                      }}
+                    >
+                      📍 {s.localizacao}
+                    </span>
+                    <span
+                      className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg"
+                      style={{
+                        background: 'rgba(59,130,246,0.08)',
+                        border: '1px solid rgba(59,130,246,0.2)',
+                        color: '#60a5fa',
+                      }}
+                    >
+                      🏋️ {s.academiaFrequente}
+                    </span>
+                    <span
+                      className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg"
+                      style={{
+                        background: 'rgba(255,107,0,0.1)',
+                        border: '1px solid rgba(255,107,0,0.22)',
+                        color: '#ff6b00',
+                      }}
+                    >
+                      💰 R$ {s.valorPorHora}/h
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card footer */}
+                <div
+                  className="px-5 py-3 flex justify-between items-center"
                   style={{
-                    background: 'rgba(173,27,42,0.1)',
-                    border: '1px solid rgba(173,27,42,0.3)',
-                    color: '#ad1b2a',
+                    background: 'rgba(0,0,0,0.2)',
+                    borderTop: '1px solid rgba(255,255,255,0.05)',
                   }}
                 >
-                  🗑 Excluir
-                </button>
+                  <span
+                    className="text-xs"
+                    style={{ color: 'rgba(255,255,255,0.25)' }}
+                  >
+                    {s.status}
+                  </span>
+                  <button
+                    onClick={() => excluirSolicitacao(s.id)}
+                    className="text-xs font-medium hover:underline transition-colors"
+                    style={{ color: '#ad1b2a', background: 'none', border: 'none', cursor: 'pointer' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#e53e3e')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#ad1b2a')}
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-
-          {solicitacoes.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-4xl mb-3">📋</p>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                Nenhuma solicitação encontrada.
-              </p>
-            </div>
+            ))
           )}
         </div>
       </section>
@@ -232,7 +294,7 @@ export default function Solicitacao() {
       <SolicitacaoModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAdd={handleAddSolicitacao}
+        onAdd={() => setIsModalOpen(false)}
       />
     </main>
   );

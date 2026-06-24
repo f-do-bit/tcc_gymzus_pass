@@ -1,274 +1,355 @@
-'use client';
+"use client";
 
-import { FormEvent } from 'react';
+import { useState, useEffect } from "react";
+import { collection, getDocs, addDoc } from "firebase/firestore";
+import { db } from "@/firebase";
 
-interface Solicitacao {
-  id: number;
-  nome: string;
-  contato: string;
-  tipoAula: string;
-  descricao: string;
-  status: string;
-}
+export default function SolicitacaoModal({ isOpen, onClose, onAdd }: { isOpen: boolean; onClose: () => void; onAdd: () => void }) {
+  const [nome, setNome] = useState("");
+  const [contato, setContato] = useState("");
+  const [valor, setValor] = useState("");
+  const [local, setLocal] = useState("");
+  const [academia, setAcademia] = useState("");
+  const [tipoAula, setTipoAula] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [especialidades, setEspecialidades] = useState<string[]>([]);
 
-interface SolicitacaoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (solicitacao: Solicitacao) => void;
-}
+  useEffect(() => {
+    const fetchEspecialidades = async () => {
+      const snap = await getDocs(collection(db, "especialidades"));
+      let arr: string[] = [];
+      snap.forEach((d) => arr = [...arr, ...Object.keys(d.data())]);
+      setEspecialidades(Array.from(new Set(arr)));
+    };
+    fetchEspecialidades();
+  }, []);
 
-export default function SolicitacaoModal({ isOpen, onClose, onAdd }: SolicitacaoModalProps) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await addDoc(collection(db, "Solicitações"), {
+        seu_nome: nome,
+        contato,
+        valorPorHora: valor,
+        localizacao: local,
+        academiaFrequente: academia,
+        tipoAula,
+        descrição: descricao,
+        status: "Aguardando resposta do professor",
+        dataCriacao: new Date()
+      });
+      onAdd();
+      onClose();
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+    }
+  };
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  const inputBase: React.CSSProperties = {
+    width: "100%",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: "10px",
+    padding: "9px 12px 9px 36px",
+    color: "#fff",
+    fontSize: "14px",
+    boxSizing: "border-box",
+    outline: "none",
+    transition: "border-color 0.2s, background 0.2s",
+    fontFamily: "inherit",
+  };
 
-    const novaSolicitacao: Solicitacao = {
-      id: Date.now(),
-      nome: formData.get('nome') as string,
-      contato: formData.get('contato') as string,
-      tipoAula: formData.get('tipoAula') as string,
-      descricao: formData.get('descricao') as string,
-      status: 'Enviada',
-    };
+  const labelBase: React.CSSProperties = {
+    display: "block",
+    fontSize: "11px",
+    fontWeight: 500,
+    color: "rgba(255,255,255,0.45)",
+    textTransform: "uppercase",
+    letterSpacing: "0.8px",
+    marginBottom: "6px",
+  };
 
-    onAdd(novaSolicitacao);
-    onClose();
+  const iconBase: React.CSSProperties = {
+    position: "absolute",
+    left: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "rgba(255,255,255,0.25)",
+    fontSize: "15px",
+    pointerEvents: "none",
+  };
+
+  const handleFocusOrange = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    e.target.style.borderColor = "rgba(255,107,0,0.55)";
+    e.target.style.background = "rgba(255,107,0,0.05)";
+  };
+
+  const handleFocusGreen = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = "rgba(0,200,83,0.45)";
+    e.target.style.background = "rgba(0,200,83,0.04)";
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    e.target.style.borderColor = "rgba(255,255,255,0.10)";
+    e.target.style.background = "rgba(255,255,255,0.04)";
   };
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center z-50 p-4"
-      style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(6px)' }}
-    >
-      <div
-        className="w-full max-w-md overflow-hidden"
-        style={{
-          background: 'linear-gradient(160deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          borderRadius: '20px',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,107,0,0.08)',
-        }}
-      >
-        {/* Header */}
-        <div
-          className="px-6 py-5 flex justify-between items-center"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div style={{
+        width: "100%",
+        maxWidth: "460px",
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.10)",
+        borderRadius: "20px",
+        padding: "32px",
+        position: "relative",
+        backdropFilter: "blur(16px)",
+      }}>
+
+        {/* Botão fechar */}
+        <button
+          onClick={onClose}
           style={{
-            borderBottom: '1px solid rgba(255,255,255,0.07)',
-            background: 'linear-gradient(180deg, rgba(255,107,0,0.10) 0%, transparent 100%)',
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            color: "rgba(255,255,255,0.5)",
+            width: "32px",
+            height: "32px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            fontSize: "14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.2s",
+          }}
+          onMouseOver={e => {
+            const btn = e.currentTarget;
+            btn.style.background = "rgba(173,27,42,0.25)";
+            btn.style.color = "#ff5c6a";
+            btn.style.borderColor = "rgba(173,27,42,0.4)";
+          }}
+          onMouseOut={e => {
+            const btn = e.currentTarget;
+            btn.style.background = "rgba(255,255,255,0.06)";
+            btn.style.color = "rgba(255,255,255,0.5)";
+            btn.style.borderColor = "rgba(255,255,255,0.10)";
           }}
         >
-          <div className="flex items-center gap-3">
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: 'rgba(255,107,0,0.15)',
-                border: '1px solid rgba(255,107,0,0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ff6b00',
-                fontSize: 17,
-              }}
-            >
-              {/* ícone — troque por qualquer SVG/lucide que preferir */}
-              ✦
-            </div>
-            <div>
-              <h3 style={{ fontSize: 16, fontWeight: 600, color: '#f1f5f9', letterSpacing: '-0.2px' }}>
-                Nova Solicitação
-              </h3>
-              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', marginTop: 1 }}>
-                Encontre seu personal ideal
-              </p>
-            </div>
-          </div>
+          ✕
+        </button>
 
-          <button
-            onClick={onClose}
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 8,
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: 'rgba(255,255,255,0.45)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 18,
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
+        {/* Header */}
+        <div style={{ marginBottom: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+            <div style={{ width: "4px", height: "24px", background: "#ff6b00", borderRadius: "2px" }} />
+            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 500, color: "#fff", letterSpacing: "-0.3px" }}>
+              Nova Solicitação
+            </h2>
+          </div>
+          <p style={{ margin: 0, fontSize: "13px", color: "rgba(255,255,255,0.38)", paddingLeft: "14px" }}>
+            Preencha os dados para encontrar seu personal
+          </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+
           {/* Nome */}
-          <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-              Seu nome
-            </label>
-            <input
-              name="nome"
-              type="text"
-              required
-              placeholder="Como devemos te chamar?"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.09)',
-                borderRadius: 10,
-                padding: '10px 13px',
-                color: '#e2e8f0',
-                fontSize: 14,
-                outline: 'none',
-              }}
-            />
+          <div>
+            <label style={labelBase}>Seu Nome</label>
+            <div style={{ position: "relative" }}>
+              <span style={{ ...iconBase, fontSize: "15px" }}>👤</span>
+              <input
+                required
+                type="text"
+                placeholder="João Silva"
+                style={inputBase}
+                onFocus={handleFocusOrange}
+                onBlur={handleBlur}
+                onChange={e => setNome(e.target.value)}
+              />
+            </div>
           </div>
 
-          {/* Contato */}
-          <div className="flex flex-col gap-1.5">
-            <label className="flex items-center gap-2" style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-              Contato
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4, padding: '1px 6px', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
-                opcional
-              </span>
-            </label>
-            <input
-              name="contato"
-              type="text"
-              placeholder="WhatsApp ou e-mail"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.09)',
-                borderRadius: 10,
-                padding: '10px 13px',
-                color: '#e2e8f0',
-                fontSize: 14,
-                outline: 'none',
-              }}
-            />
+          {/* Contato + Valor */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={labelBase}>WhatsApp</label>
+              <div style={{ position: "relative" }}>
+                <span style={{ ...iconBase, color: "rgba(0,200,83,0.5)" }}>💬</span>
+                <input
+                  required
+                  type="text"
+                  placeholder="(11) 99999-9999"
+                  style={{ ...inputBase, fontSize: "13px" }}
+                  onFocus={handleFocusGreen}
+                  onBlur={handleBlur}
+                  onChange={e => setContato(e.target.value)}
+                />
+              </div>
+            </div>
+            <div>
+              <label style={labelBase}>Valor h/aula</label>
+              <div style={{ position: "relative" }}>
+                <span style={{
+                  position: "absolute",
+                  left: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "rgba(255,107,0,0.6)",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  pointerEvents: "none",
+                }}>R$</span>
+                <input
+                  required
+                  type="number"
+                  placeholder="80"
+                  style={{ ...inputBase, fontSize: "13px", paddingLeft: "30px" }}
+                  onFocus={handleFocusOrange}
+                  onBlur={handleBlur}
+                  onChange={e => setValor(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Endereço */}
+          <div>
+            <label style={labelBase}>Endereço</label>
+            <div style={{ position: "relative" }}>
+              <span style={iconBase}>📍</span>
+              <input
+                required
+                type="text"
+                placeholder="Rua, número — bairro"
+                style={inputBase}
+                onFocus={handleFocusOrange}
+                onBlur={handleBlur}
+                onChange={e => setLocal(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Academia */}
+          <div>
+            <label style={labelBase}>Academia que frequenta</label>
+            <div style={{ position: "relative" }}>
+              <span style={iconBase}>🏢</span>
+              <input
+                required
+                type="text"
+                placeholder="Smart Fit, Bodytech…"
+                style={inputBase}
+                onFocus={handleFocusOrange}
+                onBlur={handleBlur}
+                onChange={e => setAcademia(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Tipo de Aula */}
-          <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-              Tipo de aula
-            </label>
-            <input
-              name="tipoAula"
-              type="text"
-              required
-              placeholder="Ex: Musculação, Funcional, HIIT…"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.09)',
-                borderRadius: 10,
-                padding: '10px 13px',
-                color: '#e2e8f0',
-                fontSize: 14,
-                outline: 'none',
-              }}
-            />
+          <div>
+            <label style={labelBase}>Tipo de Aula</label>
+            <div style={{ position: "relative" }}>
+              <select
+                required
+                style={{
+                  ...inputBase,
+                  paddingLeft: "12px",
+                  paddingRight: "32px",
+                  color: "rgba(255,255,255,0.55)",
+                  appearance: "none",
+                  cursor: "pointer",
+                }}
+                onFocus={handleFocusOrange}
+                onBlur={handleBlur}
+                onChange={e => setTipoAula(e.target.value)}
+              >
+                <option value="" style={{ background: "#0f172a" }}>Selecione uma especialidade…</option>
+                {especialidades.map(e => (
+                  <option key={e} value={e} style={{ background: "#0f172a" }}>{e}</option>
+                ))}
+              </select>
+              <span style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "rgba(255,255,255,0.25)",
+                fontSize: "12px",
+                pointerEvents: "none",
+              }}>▼</span>
+            </div>
           </div>
 
           {/* Descrição */}
-          <div className="flex flex-col gap-1.5">
-            <label style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-              Descrição
-            </label>
+          <div>
+            <label style={labelBase}>Objetivo / Descrição</label>
             <textarea
-              name="descricao"
-              rows={3}
               required
-              placeholder="Seus objetivos, disponibilidade de horário…"
+              rows={3}
+              placeholder="Descreva seu objetivo, disponibilidade e qualquer detalhe que ajude o personal…"
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.09)',
-                borderRadius: 10,
-                padding: '10px 13px',
-                color: '#e2e8f0',
-                fontSize: 14,
-                outline: 'none',
-                resize: 'none',
+                width: "100%",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                borderRadius: "10px",
+                padding: "9px 12px",
+                color: "#fff",
+                fontSize: "14px",
+                boxSizing: "border-box",
+                outline: "none",
+                resize: "none",
+                fontFamily: "inherit",
                 lineHeight: 1.5,
-                fontFamily: 'inherit',
+                transition: "border-color 0.2s, background 0.2s",
               }}
+              onFocus={handleFocusOrange}
+              onBlur={handleBlur}
+              onChange={e => setDescricao(e.target.value)}
             />
           </div>
 
-          {/* Footer */}
-          <div
-            className="flex items-center justify-between pt-2 mt-2"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+          {/* Submit */}
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              background: "#ff6b00",
+              border: "none",
+              borderRadius: "10px",
+              padding: "12px",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: 500,
+              cursor: "pointer",
+              letterSpacing: "0.3px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              transition: "all 0.2s",
+              marginTop: "2px",
+            }}
+            onMouseOver={e => {
+              e.currentTarget.style.background = "#e66000";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.background = "#ff6b00";
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
           >
-            {/* Status pill */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 12,
-                color: '#00c853',
-                background: 'rgba(0,200,83,0.08)',
-                border: '1px solid rgba(0,200,83,0.18)',
-                borderRadius: 20,
-                padding: '4px 10px',
-                fontWeight: 500,
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  background: '#00c853',
-                  borderRadius: '50%',
-                  display: 'inline-block',
-                }}
-              />
-              Status: Enviada
-            </div>
+            ✉ Enviar Solicitação
+          </button>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                style={{
-                  padding: '9px 16px',
-                  borderRadius: 10,
-                  background: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.10)',
-                  color: 'rgba(255,255,255,0.45)',
-                  fontSize: 13,
-                  cursor: 'pointer',
-                }}
-              >
-                Fechar
-              </button>
-              <button
-                type="submit"
-                style={{
-                  padding: '9px 20px',
-                  borderRadius: 10,
-                  background: '#ff6b00',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(255,107,0,0.28)',
-                }}
-              >
-                Enviar solicitação
-              </button>
-            </div>
-          </div>
         </form>
       </div>
     </div>
